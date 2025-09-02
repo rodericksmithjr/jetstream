@@ -1,0 +1,57 @@
+openapi: 3.0.3
+get:
+summary: List events
+parameters:
+- in: query
+name: deviceId
+schema: { type: string }
+- in: query
+name: type
+schema: { type: string }
+responses:
+'200': { description: OK }
+/v3/events/acknowledge:
+post:
+summary: Acknowledge events (no-op)
+requestBody:
+required: true
+content:
+application/json:
+schema:
+type: object
+properties:
+ids:
+type: array
+items: { type: string }
+responses:
+'200': { description: OK }
+/v3/commands/{deviceId}/door/open:
+post:
+summary: Open door command (mock)
+parameters:
+- in: path
+name: deviceId
+required: true
+schema: { type: string }
+responses:
+'200': { description: Accepted }
+'404': { description: Not found }
+/v3/commands/{deviceId}/inventory/snapshot:
+post:
+summary: Request inventory snapshot (mock)
+parameters:
+- in: path
+name: deviceId
+required: true
+schema: { type: string }
+responses:
+'200': { description: Accepted }
+'404': { description: Not found }
+components:
+securitySchemes:
+AccessKeyHeader:
+type: apiKey
+in: header
+name: AccessKey
+security:
+- AccessKeyHeader: []
