@@ -29,23 +29,116 @@ app.use("/health", checkAuth);
 
 // Example in-memory data
 let devices = [
-  { id: "dev1", name: "Fridge A", status: "online", location: "Lab 1" },
-  { id: "dev2", name: "Freezer B", status: "offline", location: "Lab 2" },
+  {
+    id: "DEV-1001",
+    name: "Fridge A",
+    type: "REFRIGERATOR",
+    status: "ONLINE",
+    location: "Lab 1",
+    firmwareVersion: "3.5.0",
+    lastSeenUtc: "2025-09-03T14:00:00Z",
+    batteryPercent: 95
+  },
+  {
+    id: "DEV-1002",
+    name: "Freezer B",
+    type: "FREEZER",
+    status: "OFFLINE",
+    location: "Lab 2",
+    firmwareVersion: "3.4.2",
+    lastSeenUtc: "2025-09-03T13:50:00Z",
+    batteryPercent: 80
+  },
+  {
+    id: "DEV-1003",
+    name: "RFID Cabinet C",
+    type: "RFID_CABINET",
+    status: "ONLINE",
+    location: "Lab 3",
+    firmwareVersion: "3.5.0",
+    lastSeenUtc: "2025-09-03T14:10:00Z",
+    batteryPercent: 88
+  },
+  {
+    id: "DEV-1004",
+    name: "Fridge D",
+    type: "REFRIGERATOR",
+    status: "ONLINE",
+    location: "Lab 4",
+    firmwareVersion: "3.5.1",
+    lastSeenUtc: "2025-09-03T14:12:00Z",
+    batteryPercent: 92
+  }
 ];
 
 let inventory = [
   {
-    deviceId: "dev1",
+    deviceId: "DEV-1001",
     items: [
-      { id: "item1", name: "Vial A" },
-      { id: "item2", name: "Vial B" }
+      { id: "ITEM-2001", sku: "VIAL-001", tagEpc: "E280689400001", description: "Sample Vial A", quantity: 10, uom: "EA", expiresOn: "2026-01-31", lastSeenUtc: "2025-09-03T14:01:00Z" },
+      { id: "ITEM-2002", sku: "VIAL-002", tagEpc: "E280689400002", description: "Sample Vial B", quantity: 5, uom: "EA", expiresOn: "2025-12-31", lastSeenUtc: "2025-09-03T14:02:00Z" }
     ]
   },
   {
-    deviceId: "dev2",
+    deviceId: "DEV-1002",
     items: [
-      { id: "item3", name: "Box C" }
+      { id: "ITEM-2003", sku: "BOX-001", tagEpc: "E280689400003", description: "Frozen Box C", quantity: 2, uom: "EA", expiresOn: "2026-03-15", lastSeenUtc: "2025-09-03T13:52:00Z" }
     ]
+  },
+  {
+    deviceId: "DEV-1003",
+    items: [
+      { id: "ITEM-2004", sku: "VIAL-003", tagEpc: "E280689400004", description: "Sample Vial C", quantity: 8, uom: "EA", expiresOn: "2026-02-28", lastSeenUtc: "2025-09-03T14:11:00Z" }
+    ]
+  },
+  {
+    deviceId: "DEV-1004",
+    items: [
+      { id: "ITEM-2005", sku: "VIAL-004", tagEpc: "E280689400005", description: "Sample Vial D", quantity: 12, uom: "EA", expiresOn: "2026-05-15", lastSeenUtc: "2025-09-03T14:13:00Z" }
+    ]
+  }
+];
+
+let events = [
+  {
+    id: "EVT-3001",
+    deviceId: "DEV-1001",
+    type: "DOOR_OPENED",
+    occurredUtc: "2025-09-03T14:05:00Z",
+    payload: { openedBy: "api", commandId: "CMD-4001" }
+  },
+  {
+    id: "EVT-3002",
+    deviceId: "DEV-1003",
+    type: "INVENTORY_SNAPSHOT",
+    occurredUtc: "2025-09-03T14:12:00Z",
+    payload: { snapshotBy: "api", commandId: "CMD-4002" }
+  },
+  {
+    id: "EVT-3003",
+    deviceId: "DEV-1002",
+    type: "DOOR_CLOSED",
+    occurredUtc: "2025-09-03T13:55:00Z",
+    payload: { closedBy: "user" }
+  }
+];
+
+let policies = [
+  {
+    id: "POL-1",
+    name: "Default Policy",
+    rules: {
+      doorOpenRequiresKey: false,
+      maxItemsPerDevice: 50
+    }
+  },
+  {
+    id: "POL-2",
+    name: "Restricted Policy",
+    rules: {
+      doorOpenRequiresKey: true,
+      maxItemsPerDevice: 20
+    }
   }
 ];
 
@@ -54,15 +147,16 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
 
-app.get("/v3/devices", (req, res) => {
-  res.json({ data: devices, count: devices.length });
-});
+app.get("/v3/devices", (req, res) => res.json({ data: devices, count: devices.length }));
 
 app.get("/v3/inventory", (req, res) => {
   const { deviceId } = req.query;
-  const inv = inventory.find((i) => i.deviceId === deviceId);
+  const inv = inventory.find(i => i.deviceId === deviceId);
   res.json(inv || { deviceId, items: [] });
 });
+
+app.get("/v3/events", (req, res) => res.json(events));
+app.get("/v3/policies", (req, res) => res.json(policies));
 
 app.post("/v3/commands/:deviceId/door/open", (req, res) => {
   const { deviceId } = req.params;
