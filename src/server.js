@@ -75,11 +75,11 @@ const events = [
 
 // ====== Simple auth middleware (mimics Jetstream header) ======
 app.use((req, res, next) => {
-  const key = req.header('AccessKey');
-  if (!key || key !== REQUIRED_ACCESS_KEY) {
-    return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Provide a valid AccessKey header.'
+//  const key = req.header('AccessKey');
+//  if (!key || key !== REQUIRED_ACCESS_KEY) {
+//    return res.status(401).json({
+//      error: 'Unauthorized',
+//      message: 'Provide a valid AccessKey header.'
     });
   }
   next();
