@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Toggle auth with environment variable
-const REQUIRE_AUTH = process.env.REQUIRE_AUTH === "false";
+const REQUIRE_AUTH = process.env.REQUIRE_AUTH === "true";
 
 // Middleware for authentication
 function checkAuth(req, res, next) {
@@ -34,8 +34,19 @@ let devices = [
 ];
 
 let inventory = [
-  { deviceId: "dev1", items: [{ id: "item1", name: "Vial A" }, { id: "item2", name: "Vial B" }] },
-  { deviceId: "dev2", items: [{ id: "item3", name: "Box C" }] },
+  {
+    deviceId: "dev1",
+    items: [
+      { id: "item1", name: "Vial A" },
+      { id: "item2", name: "Vial B" }
+    ]
+  },
+  {
+    deviceId: "dev2",
+    items: [
+      { id: "item3", name: "Box C" }
+    ]
+  }
 ];
 
 // Routes
@@ -78,7 +89,12 @@ app.post("/v3/commands/:deviceId/inventory/snapshot", (req, res) => {
 // Serve static frontend (public/index.html, etc.)
 app.use(express.static("public"));
 
-// Start server
+// ✅ Correct Render port binding
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.
+  console.log(
+    `Mock Jetstream API running on port ${PORT} (auth ${
+      REQUIRE_AUTH ? "enabled" : "disabled"
+    })`
+  );
+});
